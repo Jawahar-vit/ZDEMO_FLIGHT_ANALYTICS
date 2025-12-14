@@ -1,0 +1,58 @@
+@AccessControl.authorizationCheck: #NOT_ALLOWED
+@EndUserText.label: 'Flight Query'
+
+define transient view entity ZDEMO_FLIGHT_QUERY
+  provider contract analytical_query
+  as projection on ZDEMO_Flight_Cube
+{
+          //remove key keyord attributes in query .
+          /* Dimensions */
+
+          @AnalyticsDetails.query.axis: #ROWS
+          @AnalyticsDetails.query.totals: #HIDE
+          AirlineID,
+
+          @AnalyticsDetails.query.axis: #ROWS
+          @AnalyticsDetails.query.totals: #SHOW
+          ConnectionID,
+
+          @AnalyticsDetails.query.axis: #ROWS
+          @AnalyticsDetails.query.totals: #HIDE
+          FlightDate,
+
+          @AnalyticsDetails.query.axis: #FREE
+          @AnalyticsDetails.query.totals: #HIDE
+          PlaneType,
+
+          /* Measures */
+
+          @AnalyticsDetails.query.axis: #COLUMNS
+          @Semantics.amount.currencyCode: 'GlobalCurrency'
+          @Aggregation.default: #FORMULA
+          currency_conversion (
+            amount             => curr_to_decfloat_amount( Price ),
+            source_currency    => CurrencyCode,
+            target_currency    => cast ( 'EUR'      as abap.cuky( 5 ) ) ,
+            exchange_rate_date => cast ( '20250412' as abap.dats),
+            exchange_rate_type => 'M'
+          ) as Price,
+  virtual GlobalCurrency : abap.cuky( 5 ),
+          CurrencyCode,
+
+          @AnalyticsDetails.query.axis: #COLUMNS
+          @AnalyticsDetails.query.totals: #SHOW
+          MaximumSeats,
+
+          @AnalyticsDetails.query.axis: #COLUMNS
+          OccupiedSeats,
+
+          @AnalyticsDetails.query.axis: #COLUMNS
+          TotalFlights,
+
+
+
+          /* Associations */
+          _Airline,
+          _Connection,
+          _FlightDate
+}
