@@ -1,0 +1,51 @@
+/* setting the value to #NOT_REQUIRED would remove the warning */
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Flight Cube'
+/* Stopping annotation inheritance can help avoiding confusions */
+@Metadata.ignorePropagatedAnnotations: true
+
+/* This header annotation makes the view entity an analytical cube */
+@Analytics.dataCategory: #CUBE
+@Analytics.internalName: #LOCAL
+
+define view entity ZDEMO_Flight_Cube
+  as select from /DMO/I_Flight
+  association [0..1] to ZDEMO_Airline_Dim   as _Airline    on  _Airline.CarrierId = $projection.AirlineID
+  association [0..1] to ZDEMO_Connection_Dim as _Connection on  _Connection.CarrierId    = $projection.AirlineID
+                                                            and _Connection.ConnectionId = $projection.ConnectionID
+  association [0..1] to I_CalendarDate       as _FlightDate on  _FlightDate.CalendarDate = $projection.FlightDate
+
+{
+      @ObjectModel.foreignKey.association: '_Airline'
+  key AirlineID,
+
+      @ObjectModel.foreignKey.association: '_Connection'
+  key ConnectionID,
+
+      @ObjectModel.foreignKey.association: '_FlightDate'
+  key FlightDate,
+      PlaneType,
+
+
+      /* Measures */
+
+      CurrencyCode,
+      @Semantics.amount.currencyCode: 'CurrencyCode'
+      @Aggregation.default: #MAX
+      Price,
+
+      @Aggregation.default: #SUM
+      MaximumSeats,
+
+      @Aggregation.default: #SUM
+      OccupiedSeats,
+
+      @Aggregation.default: #SUM
+      cast (1 as abap.int4) as TotalFlights,
+
+
+      /* Associations */
+      _Airline,
+      _Connection,
+      _FlightDate
+}
