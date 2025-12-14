@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Def for Flight query'
+define service ZDEMO_SD_FLIGHT_QUERY {
+  expose ZDEMO_FLIGHT_QUERY;
+}
